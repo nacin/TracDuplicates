@@ -24,7 +24,7 @@ class TicketProxy:
     if not comment or not len(comment.strip()):
       comment = "Duplicate of #%d." % self._dupe_id
     elif -1 == comment.find('#' + str(self._dupe_id)):
-      comment = "Duplicate of #{0}.".format(self._dupe_id) + "\n\n" + comment
+      comment = "Duplicate of #%(ticket)d.\n\n%(comment)s" % { 'ticket' : self._dupe_id, 'comment' : comment }
     return self._ticket._proxy_old_save(author, comment, when=when, db=db, cnum=cnum)
 
 class DuplicatesWorkflow(Component):
