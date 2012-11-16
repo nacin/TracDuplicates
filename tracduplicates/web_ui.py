@@ -14,6 +14,11 @@ class TicketProxy:
     ticket.save_changes = self.save_changes
 
   def save_changes(self, author, comment, when=0, db=None, cnum=''):
+    if not comment or not len(comment.strip()):
+      comment = "Duplicate of #%d." % self._dupe_id
+    elif -1 == comment.find('#' + str(self._dupe_id)):
+      comment = "Duplicate of #%d.\n\n%s" % (self._dupe_id, comment)
+
     dupeticket = Ticket(self._ticket.env, self._dupe_id, db=db)
     dupeticket.save_changes(
       author,
@@ -21,10 +26,7 @@ class TicketProxy:
       when=when,
       db=db
       )
-    if not comment or not len(comment.strip()):
-      comment = "Duplicate of #%d." % self._dupe_id
-    elif -1 == comment.find('#' + str(self._dupe_id)):
-      comment = "Duplicate of #%(ticket)d.\n\n%(comment)s" % { 'ticket' : self._dupe_id, 'comment' : comment }
+
     return self._ticket._proxy_old_save(author, comment, when=when, db=db, cnum=cnum)
 
 class DuplicatesWorkflow(Component):
