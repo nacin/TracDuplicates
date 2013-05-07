@@ -13,7 +13,7 @@ class TicketProxy:
     ticket._proxy_old_save = ticket.save_changes
     ticket.save_changes = self.save_changes
 
-  def save_changes(self, author, comment, when=0, db=None, cnum=''):
+  def save_changes(self, author, comment, when=0, db=None, cnum='', replyto=None):
     if not comment or not len(comment.strip()):
       comment = "Duplicate of #%d." % self._dupe_id
     elif -1 == comment.find('#' + str(self._dupe_id)):
@@ -27,7 +27,7 @@ class TicketProxy:
       db=db
       )
 
-    return self._ticket._proxy_old_save(author, comment, when=when, db=db, cnum=cnum)
+    return self._ticket._proxy_old_save(author, comment, when=when, db=db, cnum=cnum, replyto=replyto)
 
 class DuplicatesWorkflow(Component):
   implements(ITicketActionController)
