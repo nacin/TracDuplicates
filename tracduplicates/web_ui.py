@@ -13,21 +13,20 @@ class TicketProxy:
     ticket._proxy_old_save = ticket.save_changes
     ticket.save_changes = self.save_changes
 
-  def save_changes(self, author, comment, when=0, db=None, cnum='', replyto=None):
+  def save_changes(self, author, comment, when=0, cnum='', replyto=None):
     if not comment or not len(comment.strip()):
       comment = "Duplicate of #%d." % self._dupe_id
     elif -1 == comment.find('#' + str(self._dupe_id)):
       comment = "Duplicate of #%d.\n\n%s" % (self._dupe_id, comment)
 
-    dupeticket = Ticket(self._ticket.env, self._dupe_id, db=db)
+    dupeticket = Ticket(self._ticket.env, self._dupe_id)
     dupeticket.save_changes(
       author,
       "#%d was marked as a duplicate." % self._ticket.id,
-      when=when,
-      db=db
+      when=when
       )
 
-    return self._ticket._proxy_old_save(author, comment, when=when, db=db, cnum=cnum, replyto=replyto)
+    return self._ticket._proxy_old_save(author, comment, when=when, cnum=cnum, replyto=replyto)
 
 class DuplicatesWorkflow(Component):
   implements(ITicketActionController)
@@ -50,11 +49,10 @@ class DuplicatesWorkflow(Component):
     if not req.args.get('action_dupe'):
       return {}
 
-    db = self.env.get_db_cnx()
     comment = req.args.get('comment')
     try:
       dupeid = int(req.args.get('action_dupe').replace('#', ''))
-      Ticket(self.env, dupeid, db=db)
+      Ticket(self.env, dupeid)
       TicketProxy(dupeid, ticket)
     except (ValueError, TypeError, TracError):
       raise Exception("Invalid ticket ID specified. Can't mark as duplicate.")
